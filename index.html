@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1A1S无政府服务器</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: #1a1a1a;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            padding: 100px 0;
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(0, 0, 0, 0.8));
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://i.imgur.com/wYzKnOb.jpg') no-repeat center center;
+            background-size: cover;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ff0000, 0 0 20px #ff0000;
+            }
+            to {
+                text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff0000, 0 0 40px #ff0000;
+            }
+        }
+
+        .server-info {
+            background: linear-gradient(45deg, #2c2c2c, #1a1a1a);
+            padding: 40px;
+            border-radius: 10px;
+            margin-top: 50px;
+            text-align: center;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+        }
+
+        .server-address {
+            font-size: 24px;
+            padding: 15px;
+            background: linear-gradient(45deg, #3c3c3c, #2c2c2c);
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            user-select: all;
+        }
+
+        .server-address::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feature-box {
+            background: linear-gradient(45deg, #2c2c2c, #1a1a1a);
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+
+        .feature-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .feature-box:hover::before {
+            left: 100%;
+        }
+
+        .warning-banner {
+            background: linear-gradient(45deg, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.1));
+            border: 2px solid #ff4444;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            text-align: center;
+            animation: pulse 2s infinite;
+            position: relative;
+        }
+
+        .highlight {
+            color: #ff4444;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .server-address:active {
+            transform: scale(0.98);
+        }
+
+        .server-name {
+            font-size: 72px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff0000, #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .server-subtitle {
+            font-size: 24px;
+            color: #ffffff;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .server-name-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .server-name {
+            font-size: 72px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 3px 3px 0 #ff0000,
+                         -1px -1px 0 #ff0000,  
+                         1px -1px 0 #ff0000,
+                         -1px 1px 0 #ff0000,
+                         1px 1px 0 #ff0000;
+            letter-spacing: 2px;
+        }
+
+        /* 添加服务器离线状态的样式 */
+        .server-offline {
+            color: #ff4444;
+            font-style: italic;
+            animation: blink 2s infinite;
+        }
+
+        .offline-suggestion {
+            margin-top: 10px;
+            color: #ffffff;
+            font-size: 16px;
+        }
+
+        .offline-suggestion a {
+            color: #ff9900;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .offline-suggestion a:hover {
+            color: #ffbb33;
+            text-decoration: underline;
+        }
+
+        @keyframes blink {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        /* 添加赞助者区域样式 */
+        .sponsors-section {
+            margin-top: 50px;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .sponsors-title {
+            font-size: 24px;
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .sponsors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            justify-items: center;
+            align-items: start;
+        }
+
+        .sponsor-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .sponsor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.2);
+        }
+
+        .sponsor-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        .sponsor-name {
+            color: #ffffff;
+            font-size: 16px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <header>
+        <div class="container">
+            <div class="server-name-container">
+                <div class="server-name">1A1S</div>
+                <div class="server-name">无政府生存服务器</div>
+            </div>
+            <p>在这里，<span class="highlight">没有规则，只有生存！</span></p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="warning-banner">
+            <h3>⚠️ 特别提醒 ⚠️</h3>
+            <p>1A1S服务器为无政府服务器，允许使用任何方式生存，包括外挂、作弊等</p>
+        </div>
+
+        <div class="server-info">
+            <h2>服务器信息</h2>
+            <div class="server-address" id="server-address" onclick="copyServerAddress()">
+                服务器地址：mc.minecraft1a1s.top
+            </div>
+            <p>版本：1.20.x <span class="highlight">(支持绝大多数客户端)</span></p>
+            <p id="server-status">
+                在线人数：<span id="online-players">加载中...</span> / <span id="max-players">加载中...</span>
+            </p>
+            <div class="server-uptime" id="uptime">服务器已运行：计算中...</div>
+        </div>
+
+        <div class="features">
+            <div class="feature-box">
+                <h3>完全无政府</h3>
+                <p>没有规则限制，想怎么玩就怎么玩</p>
+            </div>
+            <div class="feature-box">
+                <h3>允许外挂</h3>
+                <p>支持各类客户端，hack随意使用</p>
+            </div>
+            <div class="feature-box">
+                <h3>PVP</h3>
+                <p>全球范围内自由对战，展现你的实力</p>
+            </div>
+            <div class="feature-box">
+                <h3>无限制破坏</h3>
+                <p>任意破坏、建设，打造混沌世界</p>
+            </div>
+        </div>
+
+        <div class="sponsors-section">
+            <h2 class="sponsors-title">赞助者名单</h2>
+            <div class="sponsors-grid" id="sponsors-grid">
+                <!-- 赞助者卡片将通过 JavaScript 动态添加 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: '#ff0000' },
+                shape: { type: 'circle' },
+                opacity: {
+                    value: 0.5,
+                    random: true,
+                    animation: { enable: true, speed: 1, minimumValue: 0.1, sync: false }
+                },
+                size: {
+                    value: 3,
+                    random: true,
+                    animation: { enable: true, speed: 2, minimumValue: 0.1, sync: false }
+                },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: '#ff0000',
+                    opacity: 0.4,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: 'none',
+                    random: false,
+                    straight: false,
+                    outMode: 'bounce'
+                }
+            },
+            interactivity: {
+                detectsOn: 'canvas',
+                events: {
+                    onhover: { enable: true, mode: 'repulse' },
+                    onclick: { enable: true, mode: 'push' },
+                    resize: true
+                }
+            },
+            retina_detect: true
+        });
+
+        // 更新在线人数的函数
+        async function updatePlayerCount() {
+            try {
+                const response = await fetch('https://list.mczfw.cn/api/minecraft1a1s.top:20009');
+                const data = await response.json();
+                
+                const statusElement = document.getElementById('server-status');
+
+                // 检查服务器是否离线
+                if (data.motd === "（此服务器离线或者服务器不存在）") {
+                    statusElement.innerHTML = `
+                        <span class="server-offline">⚠️ 服务器当前不在线</span>
+                        <div class="offline-suggestion">
+                            服务器不在线，不如来玩把起床？来 <a href="https://hypixel.net" target="_blank">hypixel</a> 吧！
+                        </div>
+                    `;
+                } else {
+                    // 服务器在线，显示正常信息，不再显示维护提示
+                    statusElement.innerHTML = `在线人数：<span id="online-players">${data.p}</span> / <span id="max-players">${data.mp}</span>`;
+                }
+            } catch (error) {
+                console.error('获取服务器状态失败:', error);
+                document.getElementById('server-status').innerHTML = `
+                    <span class="server-offline">无法获取服务器状态</span>
+                    <div class="offline-suggestion">
+                        服务器不在线，不如来玩把起床？来 <a href="https://hypixel.net" target="_blank">hypixel</a> 吧！
+                    </div>
+                `;
+            }
+        }
+
+        // 页面加载时立即更新一次
+        updatePlayerCount();
+
+        // 每60秒更新一次在线人数
+        setInterval(updatePlayerCount, 60000);
+
+        function copyServerAddress() {
+            const serverAddress = 'mc.minecraft1a1s.top'; // 更新服务器地址
+            
+            // 创建临时输入框
+            const tempInput = document.createElement('input');
+            tempInput.value = serverAddress;
+            document.body.appendChild(tempInput);
+            
+            // 选择并复制
+            tempInput.select();
+            document.execCommand('copy');
+            
+            // 删除临时输入框
+            document.body.removeChild(tempInput);
+            
+            // 显示提示
+            showTooltip('已复制服务器地址！');
+        }
+
+        function showTooltip(message) {
+            // 移除已存在的提示
+            const existingTooltip = document.querySelector('.tooltip');
+            if (existingTooltip) {
+                existingTooltip.remove();
+            }
+
+            // 创建新提示
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            tooltip.textContent = message;
+            
+            // 获取服务器地址元素
+            const serverAddress = document.getElementById('server-address');
+            const rect = serverAddress.getBoundingClientRect();
+            
+            // 设置提示位置
+            tooltip.style.left = `${rect.left + rect.width / 2}px`;
+            tooltip.style.top = `${rect.top - 30}px`;
+            tooltip.style.transform = 'translateX(-50%)';
+            
+            // 添加到页面
+            document.body.appendChild(tooltip);
+            
+            // 显示提示
+            setTimeout(() => tooltip.style.opacity = '1', 10);
+            
+            // 2秒后隐藏提示
+            setTimeout(() => {
+                tooltip.style.opacity = '0';
+                setTimeout(() => tooltip.remove(), 300);
+            }, 2000);
+        }
+
+        // 为了支持现代浏览器，添加异步剪贴板API支持
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (err) {
+                return false;
+            }
+        }
+
+        // 加载赞助者数据
+        async function loadSponsors() {
+            try {
+                const response = await fetch('sponsors.json');
+                const data = await response.json();
+                const sponsorsGrid = document.getElementById('sponsors-grid');
+                
+                // 清空现有内容
+                sponsorsGrid.innerHTML = '';
+                
+                // 添加每个赞助者的卡片
+                data.sponsors.forEach(sponsor => {
+                    const sponsorCard = document.createElement('div');
+                    sponsorCard.className = 'sponsor-card';
+                    sponsorCard.onclick = () => window.open(sponsor.blog, '_blank');
+                    
+                    sponsorCard.innerHTML = `
+                        <img src="${sponsor.image}" alt="${sponsor.name}" class="sponsor-image">
+                        <div class="sponsor-name">${sponsor.name}</div>
+                    `;
+                    
+                    sponsorsGrid.appendChild(sponsorCard);
+                });
+            } catch (error) {
+                console.error('加载赞助者数据失败:', error);
+                document.getElementById('sponsors-grid').innerHTML = 
+                    '<p style="color: #ff4444;">加载赞助者数据失败</p>';
+            }
+        }
+
+        // 页面加载时加载赞助者数据
+        document.addEventListener('DOMContentLoaded', loadSponsors);
+
+        // 添加运行时间计算
+        function updateUptime() {
+            const startDate = new Date('2024-12-08T16:22:00');
+            const now = new Date();
+            const diff = now - startDate;
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('uptime').textContent = 
+                `服务器已运行：${days}天 ${hours}小时 ${minutes}分钟 ${seconds}秒`;
+        }
+
+        // 每秒更新运行时间
+        setInterval(updateUptime, 1000);
+        updateUptime(); // 立即执行一次
+    </script>
+</body>
+</html>
