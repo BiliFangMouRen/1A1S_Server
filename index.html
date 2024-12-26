@@ -383,6 +383,110 @@
             perspective: 1000px;
             will-change: transform;
         }
+
+        /* 添加移动设备响应式样式 */
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            header {
+                padding: 50px 0;
+            }
+
+            .server-name-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .server-name {
+                font-size: 48px;  /* 减小手机上的字体大小 */
+                text-align: center;
+            }
+
+            .server-info {
+                padding: 20px;
+                margin-top: 30px;
+            }
+
+            .server-address {
+                font-size: 18px;
+                padding: 12px;
+                word-break: break-all;  /* 确保长地址可以换行 */
+            }
+
+            .notice {
+                padding: 12px 15px;
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+
+            .notice-close {
+                width: 24px;
+                height: 24px;
+                line-height: 24px;
+            }
+
+            .warning-banner {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;  /* 手机上单列显示 */
+                gap: 15px;
+            }
+
+            .feature-box {
+                padding: 15px;
+            }
+
+            /* 调整赞助者卡片在手机上的显示 */
+            .sponsors-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 15px;
+            }
+
+            .sponsor-card {
+                padding: 10px;
+            }
+
+            .sponsor-image {
+                width: 80px;
+                height: 80px;
+            }
+
+            .sponsor-name {
+                font-size: 14px;
+            }
+
+            /* 优化手机上的动画效果 */
+            .notice.closing {
+                transform: translateY(-10px);  /* 减小动画幅度 */
+            }
+
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
+
+        /* 针对超小屏幕设备的额外优化 */
+        @media screen and (max-width: 320px) {
+            .server-name {
+                font-size: 36px;
+            }
+
+            .server-address {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -642,14 +746,22 @@
         updateUptime(); // 立即执行一次
 
         // 修改关闭公告的函数
-        function closeNotice(element) {
+        function closeNotice(element, content, showOnce) {
             const notice = element.parentElement;
-            notice.classList.add('closing');  // 添加关闭动画类
+            notice.classList.add('closing');
             
-            // 等待动画完成后移除元素
+            // 如果是只显示一次的公告，记录到 localStorage
+            if (showOnce) {
+                const shownNotices = JSON.parse(localStorage.getItem('shownNotices') || '[]');
+                if (!shownNotices.includes(content)) {
+                    shownNotices.push(content);
+                    localStorage.setItem('shownNotices', JSON.stringify(shownNotices));
+                }
+            }
+            
             setTimeout(() => {
                 notice.remove();
-            }, 300);  // 300ms 与 CSS 过渡时间匹配
+            }, 300);
         }
 
         // 修改加载公告的函数
@@ -664,11 +776,22 @@
                 const noticeContainer = document.getElementById('notice-container');
                 const now = new Date();
                 
+                // 获取已显示过的公告
+                const shownNotices = JSON.parse(localStorage.getItem('shownNotices') || '[]');
+                
                 // 过滤出当前有效的公告
                 const activeNotices = data.notices.filter(notice => {
                     const startTime = new Date(notice.startTime);
                     const endTime = new Date(notice.endTime);
-                    return now >= startTime && now <= endTime;
+                    const isTimeValid = now >= startTime && now <= endTime;
+                    
+                    // 如果是只显示一次的公告，检查是否已经显示过
+                    if (notice.showOnce) {
+                        return isTimeValid && !shownNotices.includes(notice.content);
+                    }
+                    
+                    // 如果不是只显示一次的公告，只检查时间
+                    return isTimeValid;
                 });
                 
                 // 显示所有有效公告
@@ -677,7 +800,7 @@
                     noticeElement.className = 'notice';
                     noticeElement.innerHTML = `
                         ${notice.content}
-                        <div class="notice-close" onclick="closeNotice(this)">×</div>
+                        <div class="notice-close" onclick="closeNotice(this, '${notice.content}', ${notice.showOnce})">×</div>
                     `;
                     noticeContainer.appendChild(noticeElement);
                 });
