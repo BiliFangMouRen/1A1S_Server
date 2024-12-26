@@ -313,6 +313,76 @@
             font-size: 16px;
             margin-top: 8px;
         }
+
+        /* 添加公告样式 */
+        .notice-container {
+            margin: 20px auto;
+            max-width: 800px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .notice {
+            background: rgba(255, 248, 220, 0.7);
+            border-left: 4px solid #ffd700;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            position: relative;
+            animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            transform: translateY(0);
+            height: auto;
+            overflow: hidden;
+            will-change: transform, opacity, height;
+        }
+
+        .notice.closing {
+            opacity: 0;
+            transform: translateY(-20px);
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            height: 0;
+        }
+
+        .notice-close {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            text-align: center;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease;
+        }
+
+        .notice-close:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 确保其他内容也有平滑过渡 */
+        .container > * {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+            will-change: transform;
+        }
     </style>
 </head>
 <body>
@@ -324,6 +394,9 @@
                 <div class="server-name">无政府生存服务器</div>
             </div>
             <p>在这里，<span class="highlight">没有规则，只有生存！</span></p>
+            <div class="notice-container" id="notice-container">
+                <!-- 公告将通过 JavaScript 动态添加 -->
+            </div>
         </div>
     </header>
 
@@ -567,6 +640,54 @@
         // 每秒更新运行时间
         setInterval(updateUptime, 1000);
         updateUptime(); // 立即执行一次
+
+        // 修改关闭公告的函数
+        function closeNotice(element) {
+            const notice = element.parentElement;
+            notice.classList.add('closing');  // 添加关闭动画类
+            
+            // 等待动画完成后移除元素
+            setTimeout(() => {
+                notice.remove();
+            }, 300);  // 300ms 与 CSS 过渡时间匹配
+        }
+
+        // 修改加载公告的函数
+        async function loadNotices() {
+            try {
+                const response = await fetch('notice.json');
+                if (!response.ok) {
+                    return;
+                }
+                
+                const data = await response.json();
+                const noticeContainer = document.getElementById('notice-container');
+                const now = new Date();
+                
+                // 过滤出当前有效的公告
+                const activeNotices = data.notices.filter(notice => {
+                    const startTime = new Date(notice.startTime);
+                    const endTime = new Date(notice.endTime);
+                    return now >= startTime && now <= endTime;
+                });
+                
+                // 显示所有有效公告
+                activeNotices.forEach(notice => {
+                    const noticeElement = document.createElement('div');
+                    noticeElement.className = 'notice';
+                    noticeElement.innerHTML = `
+                        ${notice.content}
+                        <div class="notice-close" onclick="closeNotice(this)">×</div>
+                    `;
+                    noticeContainer.appendChild(noticeElement);
+                });
+            } catch (error) {
+                console.error('加载公告失败:', error);
+            }
+        }
+
+        // 页面加载时加载公告
+        document.addEventListener('DOMContentLoaded', loadNotices);
     </script>
 </body>
 </html>
