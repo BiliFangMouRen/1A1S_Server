@@ -1,0 +1,12 @@
+{
+    "qaItems": [
+        {
+            "Q": "我为什么进不去服务器？",
+            "A": "请检查MC的版本。我们推荐使用1.20.x版本。1.20以上也可以进入服务器，但没这个必要。如果服务器无法连接，请联系腐竹。"
+        },
+        {
+            "Q": "我没有合适的Minecraft版本怎么办？",
+            "A": "我们为你准备了一个1.20.1 fabric版本的Minecraft，内置了很多生电和辅助模组，还自带一些小游戏服务器。<a href=\"https://pan.baidu.com/share/init?surl=xvKrTOkpoUoO8vPoXcL_Hg\" target=\"_blank\">点击这里下载</a>。"
+        }
+    ]
+}
