@@ -608,57 +608,94 @@
         .help-modal {
             display: none;
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.9);
             border: 1px solid #ff4444;
-            border-radius: 8px;
-            padding: 20px;
-            max-width: 500px;
-            width: 90%;
             z-index: 1001;
             opacity: 0;
-            transition: opacity 0.3s ease;
             box-sizing: border-box;
+            transition: opacity 0.3s ease;
         }
 
-        .help-modal.active {
-            opacity: 1;
-        }
-
-        .help-modal h2 {
-            color: #ff4444;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .help-modal .qa-item {
-            margin-bottom: 15px;
-            color: white;
-        }
-
-        .help-modal .question {
-            color: #ff4444;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .help-modal .answer {
-            color: #ffffff;
-            margin-left: 20px;
-        }
-
+        /* 关闭按钮基础样式 */
         .help-modal .close-button {
             position: absolute;
             top: 10px;
             right: 10px;
             background: none;
             border: none;
-            color: #ff4444;
+            color: #fff;
             font-size: 20px;
             cursor: pointer;
-            padding: 5px;
+            padding: 5px 10px;
+            transition: color 0.3s ease;
+        }
+
+        .help-modal .close-button:hover {
+            color: #ff4444;
+        }
+
+        /* 桌面端样式 */
+        @media screen and (min-width: 769px) {
+            .help-modal {
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                border-radius: 8px;
+                padding: 20px;
+                max-width: 500px;
+                width: 90%;
+            }
+        }
+
+        /* 移动端样式 */
+        @media screen and (max-width: 768px) {
+            body.modal-open {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            .help-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                height: 100%;
+                padding: 15px;
+                border: none;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                margin: 0;
+                transform: none;
+            }
+
+            .help-modal h2 {
+                position: sticky;
+                top: 0;
+                background: rgba(0, 0, 0, 0.9);
+                margin: 0 0 15px 0;
+                padding: 10px 0;
+                z-index: 2;
+            }
+
+            .qa-item {
+                margin-bottom: 20px;
+                padding: 0 10px;
+            }
+
+            .help-modal .close-button {
+                position: fixed;
+                padding: 10px;
+                font-size: 24px;
+                z-index: 3;
+            }
+        }
+
+        .help-modal.active {
+            opacity: 1;
         }
 
         .modal-overlay {
@@ -702,7 +739,7 @@
             }
         }
 
-        /* 添加轻量级提示框样式 */
+        /* 添加轻量级提��框样式 */
         .mini-tooltip {
             position: fixed;
             background: rgba(0, 0, 0, 0.7);
@@ -869,7 +906,7 @@
                 document.getElementById('server-status').innerHTML = `
                     <span class="server-offline">无法获取服务器状态</span>
                     <div class="offline-suggestion">
-                        服务器不在线，不如来玩把起床？来 <a href="https://hypixel.net" target="_blank">hypixel</a> 吧！
+                        服务器不在线，不如来玩把起床？��� <a href="https://hypixel.net" target="_blank">hypixel</a> 吧！
                     </div>
                 `;
             }
@@ -881,7 +918,7 @@
         // 每60秒更新一次在线人数
         setInterval(updatePlayerCount, 60000);
 
-        // 优化��制功能，区分移动端和桌面端
+        // 优化制功能，区分移动端和桌面端
         async function copyServerAddress() {
             if (window.innerWidth <= 768) {
                 // 移动端逻辑保持不变
@@ -986,7 +1023,7 @@
             }
         }
 
-        // 为了支持��代浏览器，添加异步剪贴板API支持
+        // 为了支持代浏览器，添加异步剪贴板API支持
         async function copyToClipboard(text) {
             try {
                 await navigator.clipboard.writeText(text);
@@ -1147,15 +1184,20 @@
             const modal = document.getElementById('helpModal');
             const overlay = document.getElementById('modalOverlay');
             
+            // 在移动端时锁定body
+            if (window.innerWidth <= 768) {
+                document.body.classList.add('modal-open');
+            }
+            
             // 先加载内容
             loadQAContent();
             
-            // 设置初始位置和显示
-            modal.style.display = 'block';
+            // 设置显示
             overlay.style.display = 'block';
+            modal.style.display = 'block';
             
-            // 强制浏览器重新计算布局
-            modal.getBoundingClientRect();
+            // 强制重排
+            void modal.offsetHeight;
             
             // 添加活动类
             requestAnimationFrame(() => {
@@ -1168,10 +1210,12 @@
             const modal = document.getElementById('helpModal');
             const overlay = document.getElementById('modalOverlay');
             
+            // 移除body锁定
+            document.body.classList.remove('modal-open');
+            
             overlay.classList.remove('active');
             modal.classList.remove('active');
             
-            // 等待动画完成后隐藏元素
             setTimeout(() => {
                 modal.style.display = 'none';
                 overlay.style.display = 'none';
